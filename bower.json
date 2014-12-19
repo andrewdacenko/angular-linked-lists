@@ -1,0 +1,24 @@
+{
+  "name": "angular-linked-lists",
+  "version": "0.0.1",
+  "authors": [
+    "Andrew Dacenko <a.s.dvornik@gmail.com>"
+  ],
+  "description": "angular linked lists",
+  "keywords": [
+    "angular",
+    "linked",
+    "lists"
+  ],
+  "license": "MIT",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "angular": "~1.3.7"
+  }
+}

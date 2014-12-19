@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html ng-app="linked">
+<head>
+	<title>Angular linked lists</title>
+</head>
+<body>
+	<div ng-controller="LinkedController as link">
+		<h2>Data out of directive</h2>
+		<pre>{{ link.data }}</pre>
+		<pre>{{ link.selected }}</pre>
+
+		<h2>Data in directive</h2>
+		<linked-lists data="link.data" selected="link.selected" selection-updated="link.updateOnServer()"></linked-lists>
+	</div>
+
+	<script src="vendors/angular/angular.js"></script>
+	<script src="src/angular-linked-lists.js"></script>
+	<script src="demo/linked.js"></script>
+</body>
+</html>
