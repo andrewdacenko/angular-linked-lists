@@ -8,7 +8,6 @@
         this.data = [{
             id: 213,
             title: 'Ukraine',
-            selected: true
         }, {
             id: 1,
             title: 'Andorra'
@@ -20,7 +19,7 @@
             title: 'United States'
         }];
 
-        this.selected = [];
+        this.selected = [this.data[0]];
 
         this.updateOnServer = updateOnServer;
 

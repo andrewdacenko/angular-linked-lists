@@ -1,63 +1,45 @@
 (function() {
     'use strict';
 
-    angular.module('angularLinkedLists', ['angularLinkedLists.tpls', 'angularLinkedLists.directives']);
-    angular.module('angularLinkedLists.tpls', ['template/angular-linked-list/linked-list.html']);
+    angular.module('angularLinkedLists', ['angularLinkedLists.tpls', 'angularLinkedLists.directives', 'angularLinkedLists.filters']);
+    angular.module('angularLinkedLists.tpls', ['template/angular-linked-list/linked-lists.html']);
     angular.module('angularLinkedLists.directives', [])
         .directive('linkedLists', linkedLists);
 
     function linkedLists() {
         return {
             restrict: 'EA',
-            templateUrl: 'template/angular-linked-list/linked-list.html',
+            templateUrl: 'template/angular-linked-list/linked-lists.html',
             scope: {
+                // filter: '=?',
                 data: '=',
                 selected: '=',
                 selectionUpdated: '&'
             },
             link: link,
-            controller: ListsController,
+            controller: LinkedListsController,
             controllerAs: 'lists'
         };
 
-        function link(scope, el, attr, ctrl) {};
+        function link(scope, el, attr, ctrl) {
+            scope.filterable = attr.filterable !== undefined;
+        };
     };
 
-    ListsController.$inject = ['$scope'];
+    LinkedListsController.$inject = ['$scope'];
 
-    function ListsController($scope) {
+    function LinkedListsController($scope) {
         $scope.data = $scope.data;
+        $scope.search = $scope.search;
+        $scope.filterable = $scope.filterable;
         $scope.selected = $scope.selected;
         $scope.select = select;
         $scope.remove = remove;
-
-        activate();
-
-        function activate() {
-            $scope.data = $scope.data.map(function(i) {
-                return angular.extend({
-                    selected: false
-                }, i);
-            });
-
-            getSelected();
-        };
-
-        function getSelected() {
-            // erase selected array
-            $scope.selected.length = 0;
-
-            for (var i = $scope.data.length - 1; i >= 0; i--) {
-                if ($scope.data[i].selected) {
-                    $scope.selected.push($scope.data[i]);
-                }
-            };
-        };
+        $scope.isSelected = isSelected;
 
         function select(item) {
-            if (item.selected) return;
+            if ($scope.isSelected(item)) return;
 
-            item.selected = true;
             $scope.selected.push(item);
 
             $scope.selectionUpdated();
@@ -68,26 +50,46 @@
 
             if (index !== -1) {
                 $scope.selected.splice(index, 1);
-                item.selected = false;
             };
 
             $scope.selectionUpdated();
         };
+
+        function isSelected(item) {
+            return $scope.selected.indexOf(item) !== -1;
+        };
     };
 
-    angular.module('template/angular-linked-list/linked-list.html', []).run(['$templateCache',
+    angular.module('angularLinkedLists.filters', [])
+        .filter('linkedListsFilter', linkedListsFilter);
+
+    linkedListsFilter.$inject = ['$filter'];
+
+    function linkedListsFilter($filter) {
+        return function(collection, selected, search) {
+            return selected.reduce(function(arr, item) {
+                return arr.indexOf(item) === -1 ? arr.concat([item]) : arr;
+            }, $filter('filter')(collection, search));
+        };
+    };
+
+    angular.module('template/angular-linked-list/linked-lists.html', []).run(['$templateCache',
         function($templateCache) {
-            $templateCache.put('template/angular-linked-list/linked-list.html',
+            $templateCache.put('template/angular-linked-list/linked-lists.html',
                 '<div>' +
+                '    <div ng-show="filterable">' +
+                '         <p>Filter: {{search}}</p>' +
+                '         <p><input ng-model="search"></p>' +
+                '    </div>' +
                 '    <h3>Initial items</h3>' +
                 '    <ul>' +
-                '        <li ng-repeat="i in data | orderBy:\'title\'" ng-click="select(i)"><span ng-bind="i.title"></span> <span ng-if="i.selected">&#10004;</span></li>' +
+                '        <li ng-repeat="i in data | linkedListsFilter:selected:search | orderBy:\'title\' track by $index" ng-click="select(i)"><span ng-bind="i.title"></span> <span ng-if="isSelected(i)">&#10004;</span></li>' +
                 '    </ul>' +
                 '<div>' +
                 '<div>' +
                 '    <h3>Selected items</h3>' +
                 '    <ul>' +
-                '        <li ng-repeat="i in selected | orderBy:\'title\'" ng-click="remove(i)"><span ng-bind="i.title"></span> <span>X</span></li>' +
+                '        <li ng-repeat="i in selected | orderBy:\'title\' track by $index" ng-click="remove(i)"><span ng-bind="i.title"></span> <span>X</span></li>' +
                 '    </ul>' +
                 '<div>'
             );
